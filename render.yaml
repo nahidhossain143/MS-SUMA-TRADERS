@@ -1,0 +1,33 @@
+# Render.com deployment config for MS SUMA TRADERS backend
+# Docs: https://render.com/docs/render-yaml
+
+services:
+  - type: web
+    name: ms-suma-traders-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install && npx prisma generate
+    startCommand: node src/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false        # Set manually in Render dashboard
+      - key: CLERK_SECRET_KEY
+        sync: false        # Set manually in Render dashboard
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false        # Set manually in Render dashboard
+      - key: CLIENT_URL
+        sync: false        # Set to your Vercel frontend URL
+      - key: ADMIN_USER_IDS
+        sync: false        # Set manually in Render dashboard
+      - key: BKASH_NUMBER
+        sync: false
+      - key: NAGAD_NUMBER
+        sync: false
+      - key: BUSINESS_PHONE
+        sync: false
+      - key: BUSINESS_WHATSAPP
+        sync: false
+      - key: CLERK_WEBHOOK_SECRET
+        sync: false        # Optional — only needed for Clerk webhooks

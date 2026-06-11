@@ -1,0 +1,93 @@
+// This is your Prisma schema file — MS SUMA TRADERS (Bangladesh)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================
+// ENUMS
+// =====================
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  BKASH
+  NAGAD
+  CASH_ON_DELIVERY
+}
+
+// =====================
+// MODELS
+// =====================
+
+model User {
+  id          String   @id @default(cuid())
+  clerkUserId String   @unique
+  email       String   @unique
+  name        String?
+  phone       String?
+  address     String?
+  upazila     String?  // Sub-district
+  isAdmin     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orders Order[]
+
+  @@map("users")
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  name         String                        // English name
+  nameBn       String                        // Bengali name e.g. মিনিকেট
+  description  String
+  imageUrl     String
+  imageUrls    String[]                      // Additional uploaded images
+  pricePerBag  Decimal  @db.Decimal(10, 2)  // Price in BDT per bag
+  bagWeightKg  Int      @default(25)         // Weight per bag in KG
+  stock        Int      @default(0)          // Number of bags in stock
+  isActive     Boolean  @default(true)
+  category     String   @default("Fine Rice")
+  origin       String   @default("Bangladesh") // e.g., Dinajpur, Sylhet
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  orders Order[]
+
+  @@map("products")
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  clerkUserId     String
+  orderNumber     String        @unique @default(cuid()) // Short human-readable ID
+  customerName    String
+  phone           String
+  upazila         String        // Delivery upazila (all in Brahmanbaria district)
+  address         String        // Detailed street address
+  quantity        Int           // Number of bags
+  totalPrice      Decimal       @db.Decimal(10, 2)
+  status          OrderStatus   @default(PENDING)
+  paymentMethod   PaymentMethod @default(CASH_ON_DELIVERY)
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  user      User    @relation(fields: [clerkUserId], references: [clerkUserId])
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  @@map("orders")
+}
